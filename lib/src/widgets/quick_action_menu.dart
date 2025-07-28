@@ -107,7 +107,6 @@ class QuickActionMenuState extends State<QuickActionMenu> {
   /// - [reverseScroll]: Whether to reverse the scroll direction.
   /// - [padding]: General padding for the screen edges, defining a "safe area"
   /// where the menu should ideally stay.
-  /// - [scrollViewPadding]: Optional, specific padding to use when the menu
   /// needs to scroll. This might differ from the general [padding].
   /// - [stickyMenuBehavior]: The sticky menu behavior for the menu. This will
   /// be use to determine the menu's sticky behavior when scrolling.
