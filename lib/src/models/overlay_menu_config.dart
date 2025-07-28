@@ -1,0 +1,126 @@
+// src/models/overlay_menu_config.dart
+import 'package:flutter/material.dart';
+import 'package:quick_action_menu/src/enums/menu_overlay_horizontal_alignment.dart'; // Assuming this enum exists
+import 'package:quick_action_menu/src/enums/sticky_menu_behavior.dart'; // New import
+
+/// {@template overlay_menu_config}
+/// Configuration class for an overlay menu in a Flutter application.
+///
+/// This class defines various properties and behaviors for an overlay menu,
+/// including its alignment, animation durations and curves, background color
+/// and opacity, and sticky menu behavior. It allows customization of the
+/// overlay's appearance and interaction with the anchor widget.
+///
+/// The overlay can display widgets above and below the anchor, and provides
+/// callbacks for when the anchor is extracted or the overlay is dismissed.
+/// {@endtemplate}
+class OverlayMenuConfig {
+  /// {@macro overlay_menu_config}
+  const OverlayMenuConfig({
+    required this.anchorKey,
+    required this.anchorWidget,
+    required this.onAnchorExtracted,
+    required this.onDismissed,
+    this.topMenuWidget,
+    this.bottomMenuWidget,
+    this.padding = EdgeInsets.zero,
+    this.topMenuAlignment = OverlayMenuHorizontalAlignment.center,
+    this.bottomMenuAlignment = OverlayMenuHorizontalAlignment.center,
+    this.overlayAnimationDuration = Durations.medium1,
+    this.overlayAnimationCurve = Curves.easeOutCubic,
+    this.anchorFlyAnimationDuration = Durations.medium2,
+    this.anchorFlyAnimationCurve = Curves.easeInOutCubic,
+    this.anchorScaleAnimationCurve = Curves.decelerate,
+    this.topMenuScaleDuration = Durations.medium2,
+    this.topMenuScaleCurve = Curves.easeOutCubic,
+    this.bottomMenuScaleDuration = Durations.medium2,
+    this.bottomMenuScaleCurve = Curves.easeOutCubic,
+    this.overlayBackgroundColor = Colors.black,
+    this.overlayBackgroundOpacity = 0.2,
+    this.backdropBlurSigmaX = 10.0,
+    this.backdropBlurSigmaY = 10.0,
+    this.reverseScroll = false, // Default to false
+    this.stickyMenuBehavior = StickyMenuBehavior.none,
+  });
+
+  /// The GlobalKey of the widget that acts as the anchor for the menu.
+  final GlobalKey anchorKey;
+
+  /// The widget that will be shown as the anchor in the overlay.
+  /// This can be the same as the original widget, or a scaled/transformed version.
+  final Widget anchorWidget;
+
+  /// General padding for the screen edges, defining a "safe area"
+  /// where the menu should ideally stay.
+  final EdgeInsets padding;
+
+  /// The widget to display above the anchor.
+  final Widget? topMenuWidget;
+
+  /// The widget to display below the anchor.
+  final Widget? bottomMenuWidget;
+
+  /// Callback when the anchor is extracted.
+  final VoidCallback? onAnchorExtracted;
+
+  /// Callback when the overlay is dismissed (e.g., by tapping outside).
+  final VoidCallback? onDismissed;
+
+  /// Horizontal alignment for the top menu widget relative to the anchor.
+  final OverlayMenuHorizontalAlignment topMenuAlignment;
+
+  /// Horizontal alignment for the bottom menu widget relative to the anchor.
+  final OverlayMenuHorizontalAlignment bottomMenuAlignment;
+
+  /// Duration for the overlay visibility animations (fade, blur).
+  final Duration overlayAnimationDuration;
+
+  /// Curve for the overlay visibility animations.
+  final Curve overlayAnimationCurve;
+
+  /// Duration for the anchor fly animation.
+  final Duration anchorFlyAnimationDuration;
+
+  /// Curve for the anchor fly animation.
+  final Curve anchorFlyAnimationCurve;
+
+  /// Curve for the anchor scale animation.
+  final Curve anchorScaleAnimationCurve;
+
+  /// Duration for the top menu scale animation.
+  final Duration topMenuScaleDuration;
+
+  /// Curve for the top menu scale animation.
+  final Curve topMenuScaleCurve;
+
+  /// Duration for the bottom menu scale animation.
+  final Duration bottomMenuScaleDuration;
+
+  /// Curve for the bottom menu scale animation.
+  final Curve bottomMenuScaleCurve;
+
+  /// The background color of the overlay.
+  final Color overlayBackgroundColor;
+
+  /// The opacity of the overlay background color (0.0 to 1.0).
+  final double overlayBackgroundOpacity;
+
+  /// The sigmaX value for the backdrop blur effect.
+  final double backdropBlurSigmaX;
+
+  /// The sigmaY value for the backdrop blur effect.
+  final double backdropBlurSigmaY;
+
+  /// Determines if the [SingleChildScrollView] should scroll in reverse.
+  /// When true, the scroll view starts at the end of its scroll extent.
+  final bool reverseScroll;
+
+  /// Defines how menus behave when the content scrolls.
+  /// [StickyMenuBehavior.none] (default) means menus scroll with content.
+  /// [StickyMenuBehavior.top] makes the top menu stick to its calculated
+  /// position relative to the scrollable viewport's top.
+  /// [StickyMenuBehavior.bottom] makes the bottom menu stick to its calculated
+  /// position relative to the scrollable viewport's bottom.
+  /// [StickyMenuBehavior.both] applies sticky behavior to both.
+  final StickyMenuBehavior stickyMenuBehavior;
+}
