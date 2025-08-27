@@ -67,20 +67,23 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
 
     _overlayVisibilityController = AnimationController(
       vsync: this,
-      duration: widget.config.overlayAnimationDuration,
-      reverseDuration: widget.config.overlayAnimationDuration,
+      duration: widget.config.duration,
+      reverseDuration: widget.config.reverseDuration,
     );
     _anchorFlyAnimationController = AnimationController(
       vsync: this,
-      duration: widget.config.anchorFlyAnimationDuration,
+      duration: widget.config.duration,
+      reverseDuration: widget.config.reverseDuration,
     );
     _topMenuScaleController = AnimationController(
       vsync: this,
-      duration: widget.config.topMenuScaleDuration,
+      duration: widget.config.duration,
+      reverseDuration: widget.config.reverseDuration,
     );
     _bottomMenuScaleController = AnimationController(
       vsync: this,
-      duration: widget.config.bottomMenuScaleDuration,
+      duration: widget.config.duration,
+      reverseDuration: widget.config.reverseDuration,
     );
 
     _topMenuScaleAnimation = Tween<double>(begin: 0, end: 1).animate(

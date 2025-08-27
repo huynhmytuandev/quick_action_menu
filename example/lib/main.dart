@@ -66,13 +66,16 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             // --- Test Case 3: Only Bottom Menu (Left Align) ---
-            ChatBubble(
-              tag: 'bubble_3',
-              text: 'Only actions here (Left Align).',
-              isSelf: true,
-              viewPadding: safeArea,
-              bottomMenuBuilder: buildActionBar,
-              bottomMenuAlignment: OverlayMenuHorizontalAlignment.left,
+            Padding(
+              padding: const EdgeInsets.only(right: 40),
+              child: ChatBubble(
+                tag: 'bubble_3',
+                text: 'Only actions here (Left Align).',
+                isSelf: true,
+                viewPadding: safeArea,
+                bottomMenuBuilder: buildActionBar,
+                bottomMenuAlignment: OverlayMenuHorizontalAlignment.left,
+              ),
             ),
             const SizedBox(height: 20),
 

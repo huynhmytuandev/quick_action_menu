@@ -91,14 +91,8 @@ class QuickActionMenuState extends State<QuickActionMenu> {
   /// - [topMenuAlignment]: The horizontal alignment of the top menu widget.
   /// - [bottomMenuAlignment]: The horizontal alignment of the bottom menu
   /// widget.
-  /// - [overlayAnimationDuration]: The duration of the overlay animation.
-  /// - [overlayAnimationCurve]: The curve of the overlay animation.
-  /// - [anchorFlyAnimationDuration]: The duration of the anchor fly animation.
-  /// - [anchorFlyAnimationCurve]: The curve of the anchor fly animation.
-  /// - [topMenuScaleDuration]: The duration of the top menu scale animation.
-  /// - [topMenuScaleCurve]: The curve of the top menu scale animation.
-  /// - [bottomMenuScaleDuration]: The duration of the bottom menu scale
-  /// animation.
+  /// - [duration]: The duration of the overlay animation.
+  /// - [reverseDuration]: The duration of the reversed animation.
   /// - [bottomMenuScaleCurve]: The curve of the bottom menu scale animation.
   /// - [overlayBackgroundColor]: The background color of the overlay.
   /// - [overlayBackgroundOpacity]: The opacity of the overlay background.
@@ -119,14 +113,12 @@ class QuickActionMenuState extends State<QuickActionMenu> {
         OverlayMenuHorizontalAlignment.center,
     OverlayMenuHorizontalAlignment bottomMenuAlignment =
         OverlayMenuHorizontalAlignment.center,
-    Duration overlayAnimationDuration = Durations.medium1,
+    Duration duration = Durations.short4,
+    Duration? reverseDuration,
     Curve overlayAnimationCurve = Curves.easeOutCubic,
-    Duration anchorFlyAnimationDuration = Durations.medium2,
     Curve anchorFlyAnimationCurve = Curves.easeOutSine,
-    Duration topMenuScaleDuration = Durations.medium2,
-    Curve topMenuScaleCurve = Curves.easeOutBack,
-    Duration bottomMenuScaleDuration = Durations.medium2,
-    Curve bottomMenuScaleCurve = Curves.easeOutBack,
+    Curve topMenuScaleCurve = Curves.easeOutCubic,
+    Curve bottomMenuScaleCurve = Curves.easeOutCubic,
     Color overlayBackgroundColor = Colors.black,
     double overlayBackgroundOpacity = 0.2,
     double backdropBlurSigmaX = 10.0,
@@ -166,6 +158,8 @@ class QuickActionMenuState extends State<QuickActionMenu> {
           key: _currentOverlayMenuKey,
           config: OverlayMenuConfig(
             anchorKey: anchorKey,
+            duration: duration,
+            reverseDuration: reverseDuration,
             topMenuWidget: topMenuWidget,
             bottomMenuWidget: bottomMenuWidget,
             reverseScroll: reverseScroll,
@@ -174,13 +168,9 @@ class QuickActionMenuState extends State<QuickActionMenu> {
             bottomMenuAlignment: bottomMenuAlignment,
             onAnchorExtracted: _onAnchorExtracted,
             onDismissed: _removeCurrentOverlayEntry,
-            overlayAnimationDuration: overlayAnimationDuration,
             overlayAnimationCurve: overlayAnimationCurve,
-            anchorFlyAnimationDuration: anchorFlyAnimationDuration,
             anchorFlyAnimationCurve: anchorFlyAnimationCurve,
-            topMenuScaleDuration: topMenuScaleDuration,
             topMenuScaleCurve: topMenuScaleCurve,
-            bottomMenuScaleDuration: bottomMenuScaleDuration,
             bottomMenuScaleCurve: bottomMenuScaleCurve,
             overlayBackgroundColor: overlayBackgroundColor,
             stickyMenuBehavior: stickyMenuBehavior,

@@ -26,14 +26,12 @@ class OverlayMenuConfig {
     this.padding = EdgeInsets.zero,
     this.topMenuAlignment = OverlayMenuHorizontalAlignment.center,
     this.bottomMenuAlignment = OverlayMenuHorizontalAlignment.center,
-    this.overlayAnimationDuration = Durations.medium1,
+    this.duration = Durations.medium1,
+    this.reverseDuration,
     this.overlayAnimationCurve = Curves.easeOutCubic,
-    this.anchorFlyAnimationDuration = Durations.medium2,
     this.anchorFlyAnimationCurve = Curves.easeInOutCubic,
     this.anchorScaleAnimationCurve = Curves.decelerate,
-    this.topMenuScaleDuration = Durations.medium2,
     this.topMenuScaleCurve = Curves.easeOutCubic,
-    this.bottomMenuScaleDuration = Durations.medium2,
     this.bottomMenuScaleCurve = Curves.easeOutCubic,
     this.overlayBackgroundColor = Colors.black,
     this.overlayBackgroundOpacity = 0.2,
@@ -72,14 +70,14 @@ class OverlayMenuConfig {
   /// Horizontal alignment for the bottom menu widget relative to the anchor.
   final OverlayMenuHorizontalAlignment bottomMenuAlignment;
 
-  /// Duration for the overlay visibility animations (fade, blur).
-  final Duration overlayAnimationDuration;
+  /// The duration for all animations.
+  final Duration duration;
+
+  /// The duration for reversed animations.
+  final Duration? reverseDuration;
 
   /// Curve for the overlay visibility animations.
   final Curve overlayAnimationCurve;
-
-  /// Duration for the anchor fly animation.
-  final Duration anchorFlyAnimationDuration;
 
   /// Curve for the anchor fly animation.
   final Curve anchorFlyAnimationCurve;
@@ -87,14 +85,8 @@ class OverlayMenuConfig {
   /// Curve for the anchor scale animation.
   final Curve anchorScaleAnimationCurve;
 
-  /// Duration for the top menu scale animation.
-  final Duration topMenuScaleDuration;
-
   /// Curve for the top menu scale animation.
   final Curve topMenuScaleCurve;
-
-  /// Duration for the bottom menu scale animation.
-  final Duration bottomMenuScaleDuration;
 
   /// Curve for the bottom menu scale animation.
   final Curve bottomMenuScaleCurve;
