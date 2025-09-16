@@ -479,20 +479,22 @@ class _MenuMeasurementWidgets extends StatelessWidget {
         minHeight: 0,
         maxHeight: double.infinity,
         alignment: Alignment.topLeft,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (topMenuWidget != null)
-              MeasureSize(
-                onResized: onTopMenuMeasured,
-                child: topMenuWidget!,
-              ),
-            if (bottomMenuWidget != null)
-              MeasureSize(
-                onResized: onBottomMenuMeasured,
-                child: bottomMenuWidget!,
-              ),
-          ],
+        child: IgnorePointer(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (topMenuWidget != null)
+                MeasureSize(
+                  onResized: onTopMenuMeasured,
+                  child: topMenuWidget!,
+                ),
+              if (bottomMenuWidget != null)
+                MeasureSize(
+                  onResized: onBottomMenuMeasured,
+                  child: bottomMenuWidget!,
+                ),
+            ],
+          ),
         ),
       ),
     );
