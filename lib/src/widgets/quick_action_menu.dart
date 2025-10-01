@@ -55,6 +55,9 @@ class QuickActionMenuState extends State<QuickActionMenu> {
   GlobalKey<OverlayMenuWidgetState>? _currentOverlayMenuKey;
   Object? _currentActiveAnchorTag;
 
+  /// Wheather a menu is currently being displayed.
+  bool get isMenuDisplayed => _currentOverlayEntry != null;
+
   /// Registers an anchor widget with the host [QuickActionMenu].
   void _registerMenuAnchor(
     Object tag,
