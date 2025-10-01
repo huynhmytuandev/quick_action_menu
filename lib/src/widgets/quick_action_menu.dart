@@ -216,7 +216,9 @@ class QuickActionMenuState extends State<QuickActionMenu> {
           await hideMenu();
           return;
         }
-        await Navigator.maybePop(context, result);
+        if (!didPop) {
+          Navigator.of(context).pop(result);
+        }
         return;
       },
       child: widget.child,
