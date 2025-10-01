@@ -209,6 +209,17 @@ class QuickActionMenuState extends State<QuickActionMenu> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.child;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (isMenuDisplayed) {
+          await hideMenu();
+          return;
+        }
+        await Navigator.maybePop(context, result);
+        return;
+      },
+      child: widget.child,
+    );
   }
 }
