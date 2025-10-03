@@ -54,9 +54,10 @@ class QuickActionMenuState extends State<QuickActionMenu> {
   OverlayEntry? _currentOverlayEntry;
   GlobalKey<OverlayMenuWidgetState>? _currentOverlayMenuKey;
   Object? _currentActiveAnchorTag;
+  final ValueNotifier<bool> _menuVisibilityNotifier = ValueNotifier(false);
 
   /// Wheather a menu is currently being displayed.
-  bool get isMenuDisplayed => _currentOverlayEntry != null;
+  bool get isMenuDisplayed => _menuVisibilityNotifier.value;
 
   /// Registers an anchor widget with the host [QuickActionMenu].
   void _registerMenuAnchor(
@@ -184,6 +185,7 @@ class QuickActionMenuState extends State<QuickActionMenu> {
     );
 
     Overlay.of(context).insert(_currentOverlayEntry!);
+    _menuVisibilityNotifier.value = true;
   }
 
   void _onAnchorExtracted() {
@@ -196,6 +198,7 @@ class QuickActionMenuState extends State<QuickActionMenu> {
   void _removeCurrentOverlayEntry() {
     if (_currentOverlayEntry != null && _currentOverlayEntry!.mounted) {
       _currentOverlayEntry!.remove();
+      _menuVisibilityNotifier.value = false;
     }
     _currentOverlayEntry = null;
     _currentOverlayMenuKey = null;
@@ -208,20 +211,32 @@ class QuickActionMenuState extends State<QuickActionMenu> {
   }
 
   @override
+  void dispose() {
+    _removeCurrentOverlayEntry();
+    _menuVisibilityNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (isMenuDisplayed) {
-          await hideMenu();
-          return;
-        }
-        if (!didPop) {
-          Navigator.of(context).pop(result);
-        }
-        return;
-      },
-      child: widget.child,
+    return ValueListenableBuilder<bool>(
+      valueListenable: _menuVisibilityNotifier,
+      builder: (context, isMenuDisplayed, child) {
+        return PopScope(
+          canPop: !isMenuDisplayed,
+          onPopInvokedWithResult: (didPop, result) async {
+            if (isMenuDisplayed) {
+              await hideMenu();
+              return;
+            }
+            if (!didPop) {
+              Navigator.of(context).pop(result);
+            }
+            return;
+          },
+          child: widget.child,
+        );
+      }
     );
   }
 }
