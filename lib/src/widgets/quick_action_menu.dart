@@ -234,9 +234,10 @@ class QuickActionMenuState extends State<QuickActionMenu> {
             }
             return;
           },
-          child: widget.child,
+          child: child!,
         );
-      }
+      },
+      child: widget.child,
     );
   }
 }
