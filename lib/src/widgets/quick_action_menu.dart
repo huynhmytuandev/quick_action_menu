@@ -7,6 +7,7 @@ import 'package:quick_action_menu/src/enums/sticky_menu_behavior.dart';
 import 'package:quick_action_menu/src/models/anchor_build_data.dart';
 import 'package:quick_action_menu/src/models/overlay_menu_config.dart';
 import 'package:quick_action_menu/src/view/overlay_menu_widget.dart';
+import 'package:quick_action_menu/src/widgets/quick_action_menu_provider.dart';
 
 part 'quick_action_anchor.dart';
 
@@ -22,6 +23,13 @@ class QuickActionMenu extends StatefulWidget {
   /// Retrieves the [QuickActionMenuState] from the nearest ancestor
   /// [QuickActionMenu] in the widget tree.
   static QuickActionMenuState of(BuildContext context) {
+    // First try to find via InheritedWidget (works in overlay contexts)
+    final providerState = QuickActionMenuProvider.maybeOf(context);
+    if (providerState != null) {
+      return providerState;
+    }
+
+    // Fallback to traditional ancestor search
     final state = context.findAncestorStateOfType<QuickActionMenuState>();
     if (state == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -158,27 +166,31 @@ class QuickActionMenuState extends State<QuickActionMenu> {
     _currentOverlayMenuKey = GlobalKey<OverlayMenuWidgetState>();
     _currentOverlayEntry = OverlayEntry(
       builder: (context) {
-        return OverlayMenuWidget(
-          key: _currentOverlayMenuKey,
-          config: OverlayMenuConfig(
-            anchorKey: anchorKey,
-            duration: duration,
-            reverseDuration: reverseDuration,
-            topMenuWidget: topMenuWidget,
-            bottomMenuWidget: bottomMenuWidget,
-            reverseScroll: reverseScroll,
-            anchorWidget: anchorWidget,
-            topMenuAlignment: topMenuAlignment,
-            bottomMenuAlignment: bottomMenuAlignment,
-            onAnchorExtracted: _onAnchorExtracted,
-            onDismissed: _removeCurrentOverlayEntry,
-            overlayAnimationCurve: overlayAnimationCurve,
-            anchorFlyAnimationCurve: anchorFlyAnimationCurve,
-            topMenuScaleCurve: topMenuScaleCurve,
-            bottomMenuScaleCurve: bottomMenuScaleCurve,
-            overlayBackgroundColor: overlayBackgroundColor,
-            stickyMenuBehavior: stickyMenuBehavior,
-            padding: padding,
+        // Wrap with provider to make state accessible in overlay context
+        return QuickActionMenuProvider(
+          state: this,
+          child: OverlayMenuWidget(
+            key: _currentOverlayMenuKey,
+            config: OverlayMenuConfig(
+              anchorKey: anchorKey,
+              duration: duration,
+              reverseDuration: reverseDuration,
+              topMenuWidget: topMenuWidget,
+              bottomMenuWidget: bottomMenuWidget,
+              reverseScroll: reverseScroll,
+              anchorWidget: anchorWidget,
+              topMenuAlignment: topMenuAlignment,
+              bottomMenuAlignment: bottomMenuAlignment,
+              onAnchorExtracted: _onAnchorExtracted,
+              onDismissed: _removeCurrentOverlayEntry,
+              overlayAnimationCurve: overlayAnimationCurve,
+              anchorFlyAnimationCurve: anchorFlyAnimationCurve,
+              topMenuScaleCurve: topMenuScaleCurve,
+              bottomMenuScaleCurve: bottomMenuScaleCurve,
+              overlayBackgroundColor: overlayBackgroundColor,
+              stickyMenuBehavior: stickyMenuBehavior,
+              padding: padding,
+            ),
           ),
         );
       },
@@ -219,25 +231,28 @@ class QuickActionMenuState extends State<QuickActionMenu> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: _menuVisibilityNotifier,
-      builder: (context, isMenuDisplayed, child) {
-        return PopScope(
-          canPop: !isMenuDisplayed,
-          onPopInvokedWithResult: (didPop, result) async {
+    return QuickActionMenuProvider(
+      state: this,
+      child: ValueListenableBuilder<bool>(
+        valueListenable: _menuVisibilityNotifier,
+        builder: (context, isMenuDisplayed, child) {
+          return PopScope(
+            canPop: !isMenuDisplayed,
+            onPopInvokedWithResult: (didPop, result) async {
             if (isMenuDisplayed) {
-              await hideMenu();
+                await hideMenu();
+                return;
+              }
+              if (!didPop) {
+                Navigator.of(context).pop(result);
+              }
               return;
-            }
-            if (!didPop) {
-              Navigator.of(context).pop(result);
-            }
-            return;
-          },
-          child: child!,
-        );
-      },
-      child: widget.child,
+            },
+            child: child!,
+          );
+        },
+        child: widget.child,
+      ),
     );
   }
 }
