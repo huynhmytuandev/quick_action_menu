@@ -329,11 +329,18 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
       child: Stack(
         fit: StackFit.expand,
         children: [
-          _MenuMeasurementWidgets(
-            topMenuWidget: widget.config.topMenuWidget,
-            bottomMenuWidget: widget.config.bottomMenuWidget,
-            onTopMenuMeasured: _onTopMenuMeasured,
-            onBottomMenuMeasured: _onBottomMenuMeasured,
+          if ((widget.config.topMenuWidget != null ||
+                  widget.config.bottomMenuWidget != null) &&
+                  _measuredBottomMenuSize == null)
+            Positioned(
+              top: -1000, // Offscreen position
+              left: -1000,
+              child: _MenuMeasurementWidgets(
+                topMenuWidget: widget.config.topMenuWidget,
+                bottomMenuWidget: widget.config.bottomMenuWidget,
+                onTopMenuMeasured: _onTopMenuMeasured,
+                onBottomMenuMeasured: _onBottomMenuMeasured,
+              ),
           ),
           if (_positionResult != null) ...[
             // 1. Background dismissal area with blur and color overlay.
