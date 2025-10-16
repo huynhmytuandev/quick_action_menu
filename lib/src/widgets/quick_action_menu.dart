@@ -196,7 +196,7 @@ class QuickActionMenuState extends State<QuickActionMenu> {
       },
     );
 
-    Overlay.of(context).insert(_currentOverlayEntry!);
+    Overlay.of(context, rootOverlay: true).insert(_currentOverlayEntry!);
     _menuVisibilityNotifier.value = true;
   }
 
