@@ -80,12 +80,6 @@ class QuickActionMenuState extends State<QuickActionMenu> {
   /// Internal use between [QuickActionAnchor] and [QuickActionMenu].
   void _unregisterMenuAnchor(Object tag) {
     _menuAnchorRegistry.remove(tag);
-    if (_currentActiveAnchorTag == tag) {
-      if (_currentOverlayMenuKey != null) {
-        _currentOverlayMenuKey?.currentState?.dismiss();
-      }
-      _currentActiveAnchorTag = null;
-    }
   }
 
   /// Hides the currently displayed quick action menu, if any.

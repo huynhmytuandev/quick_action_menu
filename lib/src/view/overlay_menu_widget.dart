@@ -145,7 +145,7 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
 
     final anchorRect = renderBox.localToGlobal(Offset.zero) & renderBox.size;
 
-    setState(() {
+    _safeSetState(() {
       _originalAnchorRect = anchorRect;
     });
 
@@ -161,7 +161,7 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
   /// Callback when the top menu widget's size is measured.
   void _onTopMenuMeasured(Size size) {
     if (_measuredTopMenuSize == null || _measuredTopMenuSize != size) {
-      setState(() {
+      _safeSetState(() {
         _measuredTopMenuSize = size;
       });
       _computeMenuLayout();
@@ -171,7 +171,7 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
   /// Callback when the bottom menu widget's size is measured.
   void _onBottomMenuMeasured(Size size) {
     if (_measuredBottomMenuSize == null || _measuredBottomMenuSize != size) {
-      setState(() {
+      _safeSetState(() {
         _measuredBottomMenuSize = size;
       });
       _computeMenuLayout();
@@ -208,7 +208,7 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
       return;
     }
 
-    setState(() {
+    _safeSetState(() {
       // Initial state for the anchor fly animation
       _positionResult = result;
       _anchorFlyOffsetAnimation =
@@ -243,7 +243,7 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
       // Re-calculate the fly offset after the menu first appears
       final endFlyOffset = _calculateAnchorCurrentPosition();
 
-      setState(() {
+      _safeSetState(() {
         // Set up the initial "fly-in" animation for the anchor.
         _anchorFlyOffsetAnimation =
             Tween<Offset>(
@@ -267,7 +267,8 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
   /// Dismisses the overlay with reverse animations.
   Future<void> _reverseAnimateAndDissmiss() async {
     final endFlyOffset = _calculateAnchorCurrentPosition();
-    setState(() {
+    if (mounted) {
+      
       _anchorFlyOffsetAnimation =
           Tween<Offset>(
             begin: _originalAnchorRect?.topLeft ?? Offset.zero,
@@ -278,7 +279,8 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
               curve: widget.config.anchorFlyAnimationCurve,
             ),
           );
-    });
+      _safeSetState(() {});
+    }
     await Future.wait([
       _overlayVisibilityController.reverse(),
       _topMenuScaleController.reverse(),
@@ -304,6 +306,12 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
       contentAnchorPosition = _originalAnchorRect!.topLeft; // Fallback
     }
     return contentAnchorPosition;
+  }
+
+  void _safeSetState(VoidCallback fn) {
+    if (mounted) {
+      setState(fn);
+    }
   }
 
   @override
@@ -480,28 +488,21 @@ class _MenuMeasurementWidgets extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Offstage(
-      child: OverflowBox(
-        minWidth: 0,
-        maxWidth: double.infinity,
-        minHeight: 0,
-        maxHeight: double.infinity,
-        alignment: Alignment.topLeft,
-        child: IgnorePointer(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (topMenuWidget != null)
-                MeasureSize(
-                  onResized: onTopMenuMeasured,
-                  child: topMenuWidget!,
-                ),
-              if (bottomMenuWidget != null)
-                MeasureSize(
-                  onResized: onBottomMenuMeasured,
-                  child: bottomMenuWidget!,
-                ),
-            ],
-          ),
+      child: IgnorePointer(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (topMenuWidget != null)
+              MeasureSize(
+                onResized: onTopMenuMeasured,
+                child: topMenuWidget!,
+              ),
+            if (bottomMenuWidget != null)
+              MeasureSize(
+                onResized: onBottomMenuMeasured,
+                child: bottomMenuWidget!,
+              ),
+          ],
         ),
       ),
     );

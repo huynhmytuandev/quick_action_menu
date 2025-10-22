@@ -110,14 +110,14 @@ class _QuickActionAnchorState extends State<QuickActionAnchor> {
       if (renderBox != null && renderBox.attached && renderBox.hasSize) {
         _placeholderSize = renderBox.size;
         _extractionNotifier.value = true;
-        setState(() {}); // Update placeholder size
+        _safeSetState(() {}); // Update placeholder size
       } else {
         debugPrint('QuickActionAnchor: Could not get size from RenderBox');
       }
     } else {
       _placeholderSize = null;
       _extractionNotifier.value = false;
-      setState(() {}); // Update placeholder visibility
+      _safeSetState(() {}); // Update placeholder visibility
     }
   }
 
@@ -150,16 +150,22 @@ class _QuickActionAnchorState extends State<QuickActionAnchor> {
     if ((oldWidget.child != null) != (widget.child != null) ||
         (oldWidget.childBuilder != null) != (widget.childBuilder != null)) {
       // Content type changed, trigger rebuild
-      setState(() {});
+      _safeSetState(() {});
     }
   }
 
   @override
   void dispose() {
-    _extractionNotifier.dispose();
+    super.dispose();
     _quickActionMenuState?._unregisterMenuAnchor(widget.tag);
     _quickActionMenuState = null;
-    super.dispose();
+    _extractionNotifier.dispose();
+  }
+
+  void _safeSetState(VoidCallback fn) {
+    if (mounted) {
+      setState(fn);
+    }
   }
 
   @override
@@ -181,7 +187,7 @@ class _QuickActionAnchorState extends State<QuickActionAnchor> {
             key: _key,
             child: Builder(
               builder: (context) {
-                if (widget.childBuilder case final childBuilder?) {
+                if (widget.childBuilder case final childBuilder? when mounted) {
                   return ValueListenableBuilder<bool>(
                     valueListenable: _extractionNotifier,
                     builder: (context, isExtracted, _) {
