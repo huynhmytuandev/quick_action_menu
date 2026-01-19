@@ -1,15 +1,13 @@
-// src/view/quick_action_menu.dart
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 import 'package:quick_action_menu/src/enums/menu_overlay_horizontal_alignment.dart';
 import 'package:quick_action_menu/src/enums/sticky_menu_behavior.dart';
 import 'package:quick_action_menu/src/models/anchor_build_data.dart';
 import 'package:quick_action_menu/src/models/overlay_menu_config.dart';
 import 'package:quick_action_menu/src/view/overlay_menu_widget.dart';
 import 'package:quick_action_menu/src/widgets/quick_action_menu_provider.dart';
-
-part 'quick_action_anchor.dart';
 
 /// A widget that manages and displays a quick action menu overlay
 /// for its descendant widgets.
@@ -19,6 +17,9 @@ class QuickActionMenu extends StatefulWidget {
 
   /// The widget tree that contains the anchor widgets for the menu.
   final Widget child;
+
+  @override
+  State<QuickActionMenu> createState() => QuickActionMenuState();
 
   /// Retrieves the [QuickActionMenuState] from the nearest ancestor
   /// [QuickActionMenu] in the widget tree.
@@ -50,9 +51,6 @@ class QuickActionMenu extends StatefulWidget {
     }
     return state;
   }
-
-  @override
-  State<QuickActionMenu> createState() => QuickActionMenuState();
 }
 
 /// The [State] for [QuickActionMenu], managing anchor registration
@@ -67,19 +65,38 @@ class QuickActionMenuState extends State<QuickActionMenu> {
   /// Wheather a menu is currently being displayed.
   bool get isMenuDisplayed => _menuVisibilityNotifier.value;
 
-  /// Registers an anchor widget with the host [QuickActionMenu].
-  void _registerMenuAnchor(
-    Object tag,
-    AnchorBuildData data,
-  ) {
-    _menuAnchorRegistry[tag] = data;
+  @override
+  Widget build(BuildContext context) {
+    return QuickActionMenuProvider(
+      state: this,
+      child: ValueListenableBuilder<bool>(
+        valueListenable: _menuVisibilityNotifier,
+        builder: (context, isMenuDisplayed, child) {
+          return PopScope(
+            canPop: !isMenuDisplayed,
+            onPopInvokedWithResult: (didPop, result) async {
+              if (isMenuDisplayed) {
+                await hideMenu();
+                return;
+              }
+              if (!didPop) {
+                Navigator.of(context).pop(result);
+              }
+              return;
+            },
+            child: child!,
+          );
+        },
+        child: widget.child,
+      ),
+    );
   }
 
-  /// Unregisters an anchor widget identified by its [tag].
-  ///
-  /// Internal use between [QuickActionAnchor] and [QuickActionMenu].
-  void _unregisterMenuAnchor(Object tag) {
-    _menuAnchorRegistry.remove(tag);
+  @override
+  void dispose() {
+    _removeCurrentOverlayEntry();
+    _menuVisibilityNotifier.dispose();
+    super.dispose();
   }
 
   /// Hides the currently displayed quick action menu, if any.
@@ -201,6 +218,18 @@ class QuickActionMenuState extends State<QuickActionMenu> {
     }
   }
 
+  /// Registers an anchor widget with the host `QuickActionMenu`.
+  ///
+  /// **Internal use only.** This method is called by `QuickActionAnchor`
+  /// to register itself with this menu.
+  @internal
+  void registerMenuAnchor(
+    Object tag,
+    AnchorBuildData data,
+  ) {
+    _menuAnchorRegistry[tag] = data;
+  }
+
   void _removeCurrentOverlayEntry() {
     if (_currentOverlayEntry != null && _currentOverlayEntry!.mounted) {
       _currentOverlayEntry!.remove();
@@ -216,37 +245,12 @@ class QuickActionMenuState extends State<QuickActionMenu> {
     }
   }
 
-  @override
-  void dispose() {
-    _removeCurrentOverlayEntry();
-    _menuVisibilityNotifier.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return QuickActionMenuProvider(
-      state: this,
-      child: ValueListenableBuilder<bool>(
-        valueListenable: _menuVisibilityNotifier,
-        builder: (context, isMenuDisplayed, child) {
-          return PopScope(
-            canPop: !isMenuDisplayed,
-            onPopInvokedWithResult: (didPop, result) async {
-            if (isMenuDisplayed) {
-                await hideMenu();
-                return;
-              }
-              if (!didPop) {
-                Navigator.of(context).pop(result);
-              }
-              return;
-            },
-            child: child!,
-          );
-        },
-        child: widget.child,
-      ),
-    );
+  /// Unregisters an anchor widget identified by its `tag`.
+  ///
+  /// **Internal use only.** This method is called by `QuickActionAnchor`
+  /// when it is disposed.
+  @internal
+  void unregisterMenuAnchor(Object tag) {
+    _menuAnchorRegistry.remove(tag);
   }
 }

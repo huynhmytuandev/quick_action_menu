@@ -1,20 +1,23 @@
 import 'dart:async';
-import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
-import 'package:quick_action_menu/src/enums/menu_overlay_horizontal_alignment.dart';
-import 'package:quick_action_menu/src/enums/sticky_menu_behavior.dart';
+import 'package:quick_action_menu/src/delegates/overlay_menu_layout_delegate.dart';
+import 'package:quick_action_menu/src/enums/overlay_slot.dart';
 import 'package:quick_action_menu/src/models/menu_position_result.dart';
 import 'package:quick_action_menu/src/models/overlay_menu_config.dart';
 import 'package:quick_action_menu/src/utils/menu_overlay_calculator.dart';
-import 'package:quick_action_menu/src/widgets/measure_size.dart';
+import 'package:quick_action_menu/src/view/components/flying_anchor_animation.dart';
+import 'package:quick_action_menu/src/view/components/menu_background_overlay.dart';
+import 'package:quick_action_menu/src/view/components/menu_measurement_widgets.dart';
 
-/// Defines the slots for layout within the CustomMultiChildLayout.
-enum OverlaySlot { top, anchor, bottom }
-
-/// A widget that displays a quick action menu as an overlay relative to an anchor widget.
+/// A widget that displays a quick action menu as an overlay relative to
+/// an anchor widget.
 class OverlayMenuWidget extends StatefulWidget {
+  /// Creates an [OverlayMenuWidget] with the given [config].
   const OverlayMenuWidget({required this.config, super.key});
+
+  /// The configuration for this overlay menu.
   final OverlayMenuConfig config;
 
   @override
@@ -343,7 +346,7 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
             Positioned(
               top: -1000, // Offscreen position
               left: -1000,
-              child: _MenuMeasurementWidgets(
+              child: MenuMeasurementWidgets(
                 topMenuWidget: widget.config.topMenuWidget,
                 bottomMenuWidget: widget.config.bottomMenuWidget,
                 onTopMenuMeasured: _onTopMenuMeasured,
@@ -352,7 +355,7 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
           ),
           if (_positionResult != null) ...[
             // 1. Background dismissal area with blur and color overlay.
-            _MenuBackgroundOverlay(
+            MenuBackgroundOverlay(
               overlayVisibilityAnimation: _overlayVisibilityController,
               onDismiss: _reverseAnimateAndDissmiss,
               backgroundColor: widget.config.overlayBackgroundColor,
@@ -361,7 +364,7 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
               blurSigmaY: widget.config.backdropBlurSigmaY,
             ),
             // 2. The flying anchor animation.
-            _FlyingAnchorAnimation(
+            FlyingAnchorAnimation(
               isVisibleNotifier: _isFlyingAnchorVisibleNotifier,
               anchorFlyAnimationController: _anchorFlyAnimationController,
               anchorFlyOffsetAnimation: _anchorFlyOffsetAnimation,
@@ -388,7 +391,7 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
                       valueListenable: _currentScrollOffsetNotifier,
                       builder: (context, scrollOffset, _) {
                         return CustomMultiChildLayout(
-                          delegate: _OverlayMenuLayoutDelegate(
+                          delegate: OverlayMenuLayoutDelegate(
                             anchorFinalXInDelegate:
                                 anchorFinalPositionInLayout.dx,
                             anchorFinalYInDelegate:
@@ -467,304 +470,5 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
         ],
       ),
     );
-  }
-}
-
-/// A hidden widget responsible for measuring the sizes of the top and
-/// bottom menus.
-class _MenuMeasurementWidgets extends StatelessWidget {
-  const _MenuMeasurementWidgets({
-    required this.topMenuWidget,
-    required this.bottomMenuWidget,
-    required this.onTopMenuMeasured,
-    required this.onBottomMenuMeasured,
-  });
-
-  final Widget? topMenuWidget;
-  final Widget? bottomMenuWidget;
-  final ValueChanged<Size> onTopMenuMeasured;
-  final ValueChanged<Size> onBottomMenuMeasured;
-
-  @override
-  Widget build(BuildContext context) {
-    return Offstage(
-      child: IgnorePointer(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (topMenuWidget != null)
-              MeasureSize(
-                onResized: onTopMenuMeasured,
-                child: topMenuWidget!,
-              ),
-            if (bottomMenuWidget != null)
-              MeasureSize(
-                onResized: onBottomMenuMeasured,
-                child: bottomMenuWidget!,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// The background overlay for the menu, handling blur, color,
-/// and dismissal taps.
-class _MenuBackgroundOverlay extends StatelessWidget {
-  const _MenuBackgroundOverlay({
-    required this.overlayVisibilityAnimation,
-    required this.onDismiss,
-    required this.backgroundColor,
-    required this.backgroundOpacity,
-    required this.blurSigmaX,
-    required this.blurSigmaY,
-  });
-
-  final Animation<double> overlayVisibilityAnimation;
-  final VoidCallback onDismiss;
-  final Color backgroundColor;
-  final double backgroundOpacity;
-  final double blurSigmaX;
-  final double blurSigmaY;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onDismiss,
-      child: AnimatedBuilder(
-        animation: overlayVisibilityAnimation,
-        builder: (context, child) {
-          return BackdropFilter(
-            filter: ImageFilter.blur(
-              sigmaX: overlayVisibilityAnimation.value * blurSigmaX,
-              sigmaY: overlayVisibilityAnimation.value * blurSigmaY,
-            ),
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: backgroundColor.withValues(
-                alpha: overlayVisibilityAnimation.value * backgroundOpacity,
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-/// Handles the animated "flying" representation of the anchor widget.
-class _FlyingAnchorAnimation extends StatelessWidget {
-  const _FlyingAnchorAnimation({
-    required this.isVisibleNotifier,
-    required this.anchorFlyAnimationController,
-    required this.anchorFlyOffsetAnimation,
-    required this.anchorScaleAnimation,
-    required this.originalAnchorSize,
-    required this.scaledAnchorSize,
-    required this.anchorWidget,
-  });
-
-  final ValueNotifier<bool> isVisibleNotifier;
-  final AnimationController anchorFlyAnimationController;
-  final Animation<Offset> anchorFlyOffsetAnimation;
-  final Animation<double> anchorScaleAnimation;
-  final Size originalAnchorSize;
-  final Size scaledAnchorSize;
-  final Widget anchorWidget;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: isVisibleNotifier,
-      builder: (context, isVisible, child) {
-        if (!isVisible) {
-          return const SizedBox.shrink(); // Hide when not visible
-        }
-        return AnimatedBuilder(
-          animation: anchorFlyAnimationController,
-          builder: (context, child) {
-            final currentGlobalAnchorPosition = anchorFlyOffsetAnimation.value;
-            final scale = anchorScaleAnimation.value;
-
-            return Positioned(
-              left: currentGlobalAnchorPosition.dx,
-              top: currentGlobalAnchorPosition.dy,
-              child: Transform.scale(
-                scale: scale,
-                alignment: Alignment.topLeft,
-                child: SizedBox.fromSize(
-                  size: originalAnchorSize,
-                  child: anchorWidget,
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-// Keep _OverlayMenuLayoutDelegate in the same file as OverlayMenuWidget
-// as they are tightly coupled.
-class _OverlayMenuLayoutDelegate extends MultiChildLayoutDelegate {
-  _OverlayMenuLayoutDelegate({
-    required this.anchorFinalXInDelegate,
-    required this.anchorFinalYInDelegate,
-    required this.anchorOriginalSize,
-    required this.anchorFinalSize,
-    required this.topMenuAlignment,
-    required this.bottomMenuAlignment,
-    required this.measuredTopMenuSize,
-    required this.measuredBottomMenuSize,
-    required this.currentScrollOffset,
-    required this.stickyMenuBehavior,
-    required this.contentTotalHeight,
-    required this.overlayDisplayHeight,
-    required this.requiresScrolling,
-    required this.padding,
-    required this.reverseScroll,
-  });
-
-  final double anchorFinalXInDelegate;
-  final double anchorFinalYInDelegate;
-  final Size anchorOriginalSize;
-  final Size anchorFinalSize;
-  final OverlayMenuHorizontalAlignment topMenuAlignment;
-  final OverlayMenuHorizontalAlignment bottomMenuAlignment;
-  final Size measuredTopMenuSize;
-  final Size measuredBottomMenuSize;
-  final StickyMenuBehavior stickyMenuBehavior;
-  final double contentTotalHeight;
-  final double overlayDisplayHeight;
-  // -- Scrolling layout values
-  final bool requiresScrolling;
-  final EdgeInsets padding;
-  final double currentScrollOffset;
-  final bool reverseScroll;
-
-  @override
-  void performLayout(Size size) {
-    if (hasChild(OverlaySlot.anchor)) {
-      layoutChild(
-        OverlaySlot.anchor,
-        BoxConstraints.tight(anchorOriginalSize),
-      );
-
-      var anchorY = anchorFinalYInDelegate;
-      if (requiresScrolling) {
-        anchorY += padding.top;
-      }
-
-      positionChild(
-        OverlaySlot.anchor,
-        Offset(anchorFinalXInDelegate, anchorY),
-      );
-    }
-
-    if (hasChild(OverlaySlot.top)) {
-      final topConstraints = BoxConstraints.tight(measuredTopMenuSize);
-      final topChildSize = layoutChild(OverlaySlot.top, topConstraints);
-      final topX = _calculateAlignedX(
-        anchorFinalXInDelegate,
-        anchorFinalSize.width,
-        topChildSize.width,
-        topMenuAlignment,
-      );
-
-      var topY = anchorFinalYInDelegate - topChildSize.height;
-
-      if (requiresScrolling) {
-        if (stickyMenuBehavior == StickyMenuBehavior.top ||
-            stickyMenuBehavior == StickyMenuBehavior.both) {
-          if (!reverseScroll) {
-            topY = currentScrollOffset + padding.top;
-          } else {
-            topY =
-                contentTotalHeight -
-                overlayDisplayHeight -
-                currentScrollOffset +
-                padding.top;
-          }
-        } else {
-          topY = padding.top;
-        }
-      }
-
-      positionChild(OverlaySlot.top, Offset(topX, topY));
-    }
-
-    if (hasChild(OverlaySlot.bottom)) {
-      final bottomConstraints = BoxConstraints.tight(measuredBottomMenuSize);
-      final bottomChildSize = layoutChild(
-        OverlaySlot.bottom,
-        bottomConstraints,
-      );
-      final bottomX = _calculateAlignedX(
-        anchorFinalXInDelegate,
-        anchorFinalSize.width,
-        bottomChildSize.width,
-        bottomMenuAlignment,
-      );
-      var bottomY = anchorFinalYInDelegate + anchorFinalSize.height;
-
-      if (requiresScrolling) {
-        if (stickyMenuBehavior == StickyMenuBehavior.bottom ||
-            stickyMenuBehavior == StickyMenuBehavior.both) {
-          if (!reverseScroll) {
-            bottomY =
-                currentScrollOffset +
-                overlayDisplayHeight -
-                bottomChildSize.height -
-                padding.bottom;
-          } else {
-            bottomY =
-                contentTotalHeight -
-                bottomChildSize.height -
-                currentScrollOffset -
-                padding.bottom;
-          }
-        } else {
-          bottomY =
-              contentTotalHeight - bottomChildSize.height - padding.bottom;
-        }
-      }
-      positionChild(OverlaySlot.bottom, Offset(bottomX, bottomY));
-    }
-  }
-
-  double _calculateAlignedX(
-    double anchorX,
-    double anchorWidth,
-    double childWidth,
-    OverlayMenuHorizontalAlignment alignment,
-  ) {
-    switch (alignment) {
-      case OverlayMenuHorizontalAlignment.left:
-        return anchorX;
-      case OverlayMenuHorizontalAlignment.center:
-        return anchorX + (anchorWidth - childWidth) / 2;
-      case OverlayMenuHorizontalAlignment.right:
-        return anchorX + anchorWidth - childWidth;
-    }
-  }
-
-  @override
-  bool shouldRelayout(covariant _OverlayMenuLayoutDelegate oldDelegate) {
-    return anchorFinalXInDelegate != oldDelegate.anchorFinalXInDelegate ||
-        anchorFinalYInDelegate != oldDelegate.anchorFinalYInDelegate ||
-        anchorOriginalSize != oldDelegate.anchorOriginalSize ||
-        anchorFinalSize != oldDelegate.anchorFinalSize ||
-        topMenuAlignment != oldDelegate.topMenuAlignment ||
-        bottomMenuAlignment != oldDelegate.bottomMenuAlignment ||
-        measuredTopMenuSize != oldDelegate.measuredTopMenuSize ||
-        measuredBottomMenuSize != oldDelegate.measuredBottomMenuSize ||
-        currentScrollOffset != oldDelegate.currentScrollOffset ||
-        stickyMenuBehavior != oldDelegate.stickyMenuBehavior ||
-        contentTotalHeight != oldDelegate.contentTotalHeight ||
-        overlayDisplayHeight != oldDelegate.overlayDisplayHeight ||
-        reverseScroll != oldDelegate.reverseScroll;
   }
 }

@@ -1,4 +1,6 @@
-part of 'quick_action_menu.dart';
+import 'package:flutter/material.dart';
+import 'package:quick_action_menu/src/models/anchor_build_data.dart';
+import 'package:quick_action_menu/src/widgets/quick_action_menu.dart';
 
 /// Signature for a function that builds a placeholder widget for the anchor.
 typedef QuickActionAnchorPlaceholderBuilder =
@@ -87,14 +89,16 @@ class _QuickActionAnchorState extends State<QuickActionAnchor> {
 
       try {
         _quickActionMenuState = QuickActionMenu.of(context);
-        _quickActionMenuState?._registerMenuAnchor(
+        _quickActionMenuState?.registerMenuAnchor(
           widget.tag,
           AnchorBuildData(
             key: _key,
             onExtractedChanged: _onExtractedChanged,
           ),
         );
-      } catch (e) {
+        // QuickActionMenu.of throws FlutterError when ancestor not found.
+        // ignore: avoid_catching_errors
+      } on FlutterError catch (e) {
         debugPrint(
           'QuickActionAnchor: Failed to register with QuickActionMenu: $e',
         );
@@ -127,19 +131,21 @@ class _QuickActionAnchorState extends State<QuickActionAnchor> {
 
     // Handle tag changes
     if (oldWidget.tag != widget.tag) {
-      _quickActionMenuState?._unregisterMenuAnchor(oldWidget.tag);
+      _quickActionMenuState?.unregisterMenuAnchor(oldWidget.tag);
 
       try {
         final currentQuickActionMenuState = QuickActionMenu.of(context);
         _quickActionMenuState = currentQuickActionMenuState;
-        _quickActionMenuState?._registerMenuAnchor(
+        _quickActionMenuState?.registerMenuAnchor(
           widget.tag,
           AnchorBuildData(
             key: _key,
             onExtractedChanged: _onExtractedChanged,
           ),
         );
-      } catch (e) {
+        // QuickActionMenu.of throws FlutterError when ancestor not found.
+        // ignore: avoid_catching_errors
+      } on FlutterError catch (e) {
         debugPrint(
           'QuickActionAnchor: Failed to re-register with QuickActionMenu: $e',
         );
@@ -156,10 +162,10 @@ class _QuickActionAnchorState extends State<QuickActionAnchor> {
 
   @override
   void dispose() {
-    super.dispose();
-    _quickActionMenuState?._unregisterMenuAnchor(widget.tag);
+    _quickActionMenuState?.unregisterMenuAnchor(widget.tag);
     _quickActionMenuState = null;
     _extractionNotifier.dispose();
+    super.dispose();
   }
 
   void _safeSetState(VoidCallback fn) {

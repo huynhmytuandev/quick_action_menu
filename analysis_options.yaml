@@ -1,1 +1,13 @@
 include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+
+linter:
+  rules:
+    # Allow redundant arguments in tests for explicitness and readability
+    avoid_redundant_argument_values: false
+    # Allow double literals where int would suffice for consistency
+    prefer_int_literals: false

@@ -47,7 +47,7 @@ Widget buildActionBar(BuildContext context) {
       borderRadius: BorderRadius.circular(10.0),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.2),
+          color: Colors.black.withValues(alpha: .2),
           blurRadius: 8,
           offset: const Offset(0, 4),
         ),
@@ -76,7 +76,7 @@ Widget buildLongActionBar(BuildContext context) {
       borderRadius: BorderRadius.circular(10.0),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.2),
+          color: Colors.black.withValues(alpha: .2),
           blurRadius: 8,
           offset: const Offset(0, 4),
         ),

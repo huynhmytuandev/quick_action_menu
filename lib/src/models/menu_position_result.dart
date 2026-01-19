@@ -52,6 +52,27 @@ class MenuPositionResult {
   /// [requiresScrolling] is true.
   final Size contentTotalSize;
 
+  /// Creates a copy of this [MenuPositionResult] with the given fields
+  /// replaced with new values.
+  ///
+  /// This is useful for testing and creating variations of a result.
+  MenuPositionResult copyWith({
+    Rect? overlayDisplayRect,
+    Size? scaledAnchorSize,
+    Offset? anchorOffsetInOverlayContent,
+    bool? requiresScrolling,
+    Size? contentTotalSize,
+  }) {
+    return MenuPositionResult(
+      overlayDisplayRect: overlayDisplayRect ?? this.overlayDisplayRect,
+      scaledAnchorSize: scaledAnchorSize ?? this.scaledAnchorSize,
+      anchorOffsetInOverlayContent:
+          anchorOffsetInOverlayContent ?? this.anchorOffsetInOverlayContent,
+      requiresScrolling: requiresScrolling ?? this.requiresScrolling,
+      contentTotalSize: contentTotalSize ?? this.contentTotalSize,
+    );
+  }
+
   /// Overrides the equality operator to compare [MenuPositionResult] instances
   /// based on the equality of all their final fields.
   @override

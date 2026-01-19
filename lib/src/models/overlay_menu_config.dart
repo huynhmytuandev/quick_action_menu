@@ -115,4 +115,63 @@ class OverlayMenuConfig {
   /// position relative to the scrollable viewport's bottom.
   /// [StickyMenuBehavior.both] applies sticky behavior to both.
   final StickyMenuBehavior stickyMenuBehavior;
+
+  /// Creates a copy of this [OverlayMenuConfig] with the given fields
+  /// replaced with new values.
+  ///
+  /// This is useful for testing and creating variations of a config.
+  OverlayMenuConfig copyWith({
+    GlobalKey? anchorKey,
+    Widget? anchorWidget,
+    VoidCallback? onAnchorExtracted,
+    VoidCallback? onDismissed,
+    Widget? topMenuWidget,
+    Widget? bottomMenuWidget,
+    EdgeInsets? padding,
+    OverlayMenuHorizontalAlignment? topMenuAlignment,
+    OverlayMenuHorizontalAlignment? bottomMenuAlignment,
+    Duration? duration,
+    Duration? reverseDuration,
+    Curve? overlayAnimationCurve,
+    Curve? anchorFlyAnimationCurve,
+    Curve? anchorScaleAnimationCurve,
+    Curve? topMenuScaleCurve,
+    Curve? bottomMenuScaleCurve,
+    Color? overlayBackgroundColor,
+    double? overlayBackgroundOpacity,
+    double? backdropBlurSigmaX,
+    double? backdropBlurSigmaY,
+    bool? reverseScroll,
+    StickyMenuBehavior? stickyMenuBehavior,
+  }) {
+    return OverlayMenuConfig(
+      anchorKey: anchorKey ?? this.anchorKey,
+      anchorWidget: anchorWidget ?? this.anchorWidget,
+      onAnchorExtracted: onAnchorExtracted ?? this.onAnchorExtracted,
+      onDismissed: onDismissed ?? this.onDismissed,
+      topMenuWidget: topMenuWidget ?? this.topMenuWidget,
+      bottomMenuWidget: bottomMenuWidget ?? this.bottomMenuWidget,
+      padding: padding ?? this.padding,
+      topMenuAlignment: topMenuAlignment ?? this.topMenuAlignment,
+      bottomMenuAlignment: bottomMenuAlignment ?? this.bottomMenuAlignment,
+      duration: duration ?? this.duration,
+      reverseDuration: reverseDuration ?? this.reverseDuration,
+      overlayAnimationCurve:
+          overlayAnimationCurve ?? this.overlayAnimationCurve,
+      anchorFlyAnimationCurve:
+          anchorFlyAnimationCurve ?? this.anchorFlyAnimationCurve,
+      anchorScaleAnimationCurve:
+          anchorScaleAnimationCurve ?? this.anchorScaleAnimationCurve,
+      topMenuScaleCurve: topMenuScaleCurve ?? this.topMenuScaleCurve,
+      bottomMenuScaleCurve: bottomMenuScaleCurve ?? this.bottomMenuScaleCurve,
+      overlayBackgroundColor:
+          overlayBackgroundColor ?? this.overlayBackgroundColor,
+      overlayBackgroundOpacity:
+          overlayBackgroundOpacity ?? this.overlayBackgroundOpacity,
+      backdropBlurSigmaX: backdropBlurSigmaX ?? this.backdropBlurSigmaX,
+      backdropBlurSigmaY: backdropBlurSigmaY ?? this.backdropBlurSigmaY,
+      reverseScroll: reverseScroll ?? this.reverseScroll,
+      stickyMenuBehavior: stickyMenuBehavior ?? this.stickyMenuBehavior,
+    );
+  }
 }

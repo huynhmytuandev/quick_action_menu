@@ -4,5 +4,6 @@ library;
 
 export 'src/enums/menu_overlay_horizontal_alignment.dart';
 export 'src/enums/sticky_menu_behavior.dart';
+export 'src/widgets/quick_action_anchor.dart';
 export 'src/widgets/quick_action_menu.dart';
 export 'src/widgets/quick_action_menu_provider.dart';
