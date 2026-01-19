@@ -22,3 +22,8 @@
 ### Fixed
 
 - Fix the demo GIF paths in README.md
+
+## [1.0.1] - 2026-01-21
+
+### Added
+- Added example for programmatic control of the menu in the demo app
