@@ -16,3 +16,9 @@
 - **Safe area padding** - Configurable padding to keep menus within screen bounds
 - **Menu visibility notifier** - ValueNotifier to observe menu open/close state
 - **Programmatic control** - Methods to show and dismiss menus programmatically
+
+## [1.0.0+1] - 2026-01-20
+
+### Fixed
+
+- Fix the demo GIF paths in README.md
