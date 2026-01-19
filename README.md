@@ -1,42 +1,81 @@
-# quick_action_menu
+# Quick Action Menu
 
-A Flutter package for showing highly customizable context menus (inspired by Telegram/WeChat-style quick action menus) for any widget, such as chat message bubbles. This package handles complex layout, positioning, and animations, including "flying" anchor effects and sticky menu behaviors during scrolling.
+[![pub package](https://img.shields.io/pub/v/quick_action_menu.svg)](https://pub.dev/packages/quick_action_menu)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Flutter](https://img.shields.io/badge/Flutter-3.32+-blue.svg)](https://flutter.dev)
+
+A Flutter package for displaying highly customizable context menus inspired by Telegram and WeChat-style quick action menus. Perfect for chat applications, message bubbles, or any widget that needs contextual actions with smooth "flying" anchor animations and sticky menu behaviors.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/user/quick_action_menu/main/demo.gif" alt="Quick Action Menu Demo" width="300"/>
+</p>
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [API Reference](#api-reference)
+  - [QuickActionMenu](#quickactionmenu)
+  - [QuickActionAnchor](#quickactionanchor)
+  - [QuickActionMenuState](#quickactionmenustate)
+  - [Enums](#enums)
+- [Advanced Usage](#advanced-usage)
+  - [Custom Placeholders](#custom-placeholders)
+  - [Dynamic Child Builder](#dynamic-child-builder)
+  - [Programmatic Control](#programmatic-control)
+- [Example](#example)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
 
 ## Features
 
-- **Contextual Menus:** Easily attach and display customizable menus above or below any Flutter widget.
-- **Anchor Animation:** Smooth "fly-in" and "fly-out" animations for the anchor widget as the menu appears/disappears.
-- **Flexible Positioning:** Automatically calculates optimal menu position based on screen boundaries, padding, and anchor location.
-- **Horizontal Alignment:** Control the horizontal alignment of top and bottom menu widgets relative to the anchor (left, center, right).
-- **Sticky Menu Behavior:** Define whether the top, bottom, or both menus should stick to the viewport edges or anchor during scrolling.
-- **Background Effects:** Customizable overlay background with color and backdrop blur.
-- **Dismissal:** Dismiss the menu by tapping outside or programmatically.
-- **Performance Optimized:** Uses `CustomMultiChildLayout` for efficient layout and `MeasureSize` for dynamic widget measurements without unnecessary rebuilds.
+| Feature | Description |
+|---------|-------------|
+| 🎯 **Contextual Menus** | Display customizable menus above and/or below any widget |
+| ✨ **Anchor Animation** | Smooth "fly-in" and "fly-out" animations for the anchor widget |
+| 📐 **Smart Positioning** | Automatically calculates optimal menu position based on screen boundaries |
+| ↔️ **Horizontal Alignment** | Control menu alignment relative to the anchor (left, center, right) |
+| 📌 **Sticky Behavior** | Menus can stick to viewport edges during scrolling |
+| 🌫️ **Background Effects** | Customizable overlay with color tint and backdrop blur |
+| 👆 **Easy Dismissal** | Tap outside or dismiss programmatically |
+| ⚡ **Performance Optimized** | Efficient layout with `CustomMultiChildLayout` |
+| 🔙 **Back Button Support** | Automatically handles Android back button to dismiss menu |
+
+---
 
 ## Installation
 
-Add the following to your `pubspec.yaml` file:
+Add `quick_action_menu` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  quick_action_menu: ^0.1.0 # Use the latest version
-````
+  quick_action_menu: ^0.1.0
+```
 
-Then, run `flutter pub get` to fetch the package.
+Then run:
 
-## Usage
+```bash
+flutter pub get
+```
 
-### 1\. Wrap your application with `QuickActionMenu`
+---
 
-To enable the quick action menu functionality, wrap your top-level `MaterialApp` or a significant portion of your widget tree with `QuickActionMenu`. This widget manages the overlay.
+## Quick Start
+
+### 1. Wrap with QuickActionMenu
+
+Wrap your widget tree with `QuickActionMenu` to enable the overlay system:
 
 ```dart
 import 'package:flutter/material.dart';
 import 'package:quick_action_menu/quick_action_menu.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -44,199 +83,335 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Quick Action Menu Demo',
-      home: QuickActionMenu( // Wrap your app or desired subtree
-        child: MyHomePage(),
+      home: QuickActionMenu(
+        child: const MyHomePage(),
       ),
     );
   }
 }
 ```
 
-### 2\. Define your `QuickActionAnchor`
+### 2. Define an Anchor
 
-Wrap the widget you want to serve as the anchor for the context menu with `QuickActionAnchor`. Provide a unique `tag` for this anchor.
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:quick_action_menu/quick_action_menu.dart';
-
-class MyHomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Quick Action Menu Demo')),
-      body: Center(
-        child: QuickActionAnchor(
-          tag: 'myUniqueMessageAnchor', // Unique tag for this anchor
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            color: Colors.blue,
-            child: const Text(
-              'Long press this text',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-```
-
-You can optionally provide a `placeholderBuilder` to define what appears in place of the original anchor widget when it "flies out" to the overlay. If not provided, an empty `SizedBox` matching the original anchor's size will be shown.
+Wrap any widget with `QuickActionAnchor` and provide a unique `tag`:
 
 ```dart
 QuickActionAnchor(
-  tag: 'myUniqueMessageAnchor',
-  placeholderBuilder: (context, heroSize) {
-    return Container(
-      width: heroSize.width,
-      height: heroSize.height,
-      color: Colors.blue.withOpacity(0.3), // Faded placeholder
-      alignment: Alignment.center,
-      child: const CircularProgressIndicator(),
-    );
-  },
-  child: // Your original anchor widget
+  tag: 'message_1',
+  child: Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.blue,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: const Text(
+      'Long press me!',
+      style: TextStyle(color: Colors.white),
+    ),
+  ),
 )
 ```
 
-### 3\. Show the menu
+### 3. Show the Menu
 
-To show the quick action menu, use `QuickActionMenu.of(context).showMenu()`. You need to provide the `tag` of your `QuickActionAnchor` and various optional parameters to customize the menu's appearance and behavior.
+Call `showMenu()` on the `QuickActionMenuState`:
 
-The `anchorWidget` parameter in `showMenu` is crucial. It represents the actual widget that will "fly" and be displayed within the overlay. This is typically a duplicate of your `QuickActionAnchor`'s `child` widget, potentially wrapped in a `Hero` widget for custom animations.
+```dart
+GestureDetector(
+  onLongPress: () {
+    QuickActionMenu.of(context).showMenu(
+      tag: 'message_1',
+      topMenuWidget: _buildReactionMenu(),
+      bottomMenuWidget: _buildActionBar(),
+    );
+  },
+  child: QuickActionAnchor(
+    tag: 'message_1',
+    child: const MessageBubble(),
+  ),
+)
+```
+
+---
+
+## API Reference
+
+### QuickActionMenu
+
+The root widget that manages the overlay system. Place this high in your widget tree.
+
+```dart
+const QuickActionMenu({
+  required Widget child,
+  Key? key,
+})
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `child` | `Widget` | **Required.** The widget tree containing anchor widgets |
+
+#### Static Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `QuickActionMenu.of(context)` | `QuickActionMenuState` | Retrieves the nearest `QuickActionMenuState` from the widget tree |
+
+---
+
+### QuickActionAnchor
+
+A widget that marks an anchor point for the quick action menu.
+
+```dart
+const QuickActionAnchor({
+  required Object tag,
+  Widget? child,
+  QuickActionAnchorChildBuilder? childBuilder,
+  QuickActionAnchorPlaceholderBuilder? placeholderBuilder,
+  Key? key,
+})
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `tag` | `Object` | **Required.** Unique identifier for this anchor |
+| `child` | `Widget?` | The anchor widget (either `child` or `childBuilder` required) |
+| `childBuilder` | `QuickActionAnchorChildBuilder?` | Builder for dynamic content based on extraction state |
+| `placeholderBuilder` | `QuickActionAnchorPlaceholderBuilder?` | Builder for the placeholder shown when anchor is extracted |
+
+#### Type Definitions
+
+```dart
+/// Builder for placeholder widget
+typedef QuickActionAnchorPlaceholderBuilder = Widget Function(
+  BuildContext context,
+  Size heroSize,
+);
+
+/// Builder for dynamic child based on extraction state
+typedef QuickActionAnchorChildBuilder = Widget Function(
+  BuildContext context,
+  bool isExtracted,
+  Widget? child,
+);
+```
+
+---
+
+### QuickActionMenuState
+
+The state object that controls menu display. Access via `QuickActionMenu.of(context)`.
+
+#### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `isMenuDisplayed` | `bool` | Whether a menu is currently visible |
+
+#### Methods
+
+##### `showMenu()`
+
+Displays the quick action menu for the specified anchor.
+
+```dart
+void showMenu({
+  required Object tag,
+  Widget? topMenuWidget,
+  Widget? bottomMenuWidget,
+  OverlayMenuHorizontalAlignment topMenuAlignment,
+  OverlayMenuHorizontalAlignment bottomMenuAlignment,
+  Duration duration,
+  Duration? reverseDuration,
+  Curve overlayAnimationCurve,
+  Curve anchorFlyAnimationCurve,
+  Curve topMenuScaleCurve,
+  Curve bottomMenuScaleCurve,
+  Color overlayBackgroundColor,
+  double overlayBackgroundOpacity,
+  double backdropBlurSigmaX,
+  double backdropBlurSigmaY,
+  bool reverseScroll,
+  EdgeInsets padding,
+  StickyMenuBehavior stickyMenuBehavior,
+})
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `tag` | `Object` | **Required** | The unique tag of the target `QuickActionAnchor` |
+| `topMenuWidget` | `Widget?` | `null` | Widget displayed above the anchor |
+| `bottomMenuWidget` | `Widget?` | `null` | Widget displayed below the anchor |
+| `topMenuAlignment` | `OverlayMenuHorizontalAlignment` | `center` | Horizontal alignment of top menu |
+| `bottomMenuAlignment` | `OverlayMenuHorizontalAlignment` | `center` | Horizontal alignment of bottom menu |
+| `duration` | `Duration` | `Durations.short4` | Animation duration |
+| `reverseDuration` | `Duration?` | `null` | Reverse animation duration (defaults to `duration`) |
+| `overlayAnimationCurve` | `Curve` | `Curves.easeOutCubic` | Curve for overlay fade/blur animations |
+| `anchorFlyAnimationCurve` | `Curve` | `Curves.easeOutSine` | Curve for anchor fly animation |
+| `topMenuScaleCurve` | `Curve` | `Curves.easeOutCubic` | Curve for top menu scale animation |
+| `bottomMenuScaleCurve` | `Curve` | `Curves.easeOutCubic` | Curve for bottom menu scale animation |
+| `overlayBackgroundColor` | `Color` | `Colors.black` | Background color of the overlay |
+| `overlayBackgroundOpacity` | `double` | `0.2` | Opacity of overlay background (0.0–1.0) |
+| `backdropBlurSigmaX` | `double` | `10.0` | Horizontal blur sigma |
+| `backdropBlurSigmaY` | `double` | `10.0` | Vertical blur sigma |
+| `reverseScroll` | `bool` | `false` | Reverse scroll direction (useful for chat UIs) |
+| `padding` | `EdgeInsets` | `EdgeInsets.zero` | Safe area padding for menu positioning |
+| `stickyMenuBehavior` | `StickyMenuBehavior` | `none` | Sticky behavior during scrolling |
+
+##### `hideMenu()`
+
+Programmatically dismisses the currently displayed menu with animation.
+
+```dart
+Future<void> hideMenu()
+```
+
+---
+
+### Enums
+
+#### OverlayMenuHorizontalAlignment
+
+Controls horizontal alignment of menu widgets relative to the anchor.
+
+```dart
+enum OverlayMenuHorizontalAlignment {
+  left,    // Align menu to the left edge of anchor
+  center,  // Center menu relative to anchor
+  right,   // Align menu to the right edge of anchor
+}
+```
+
+#### StickyMenuBehavior
+
+Defines how menus behave when the overlay content scrolls.
+
+```dart
+enum StickyMenuBehavior {
+  none,    // Neither menu sticks
+  top,     // Top menu sticks to viewport top during scroll
+  bottom,  // Bottom menu sticks to viewport bottom during scroll
+  both,    // Both menus stick to their respective edges
+}
+```
+
+---
+
+## Advanced Usage
+
+### Custom Placeholders
+
+Define what appears in place of the anchor when it "flies" to the overlay:
+
+```dart
+QuickActionAnchor(
+  tag: 'message_1',
+  placeholderBuilder: (context, size) {
+    return Container(
+      width: size.width,
+      height: size.height,
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+    );
+  },
+  child: const MessageBubble(),
+)
+```
+
+### Dynamic Child Builder
+
+React to the extraction state with `childBuilder`:
+
+```dart
+QuickActionAnchor(
+  tag: 'message_1',
+  childBuilder: (context, isExtracted, child) {
+    return AnimatedOpacity(
+      opacity: isExtracted ? 0.5 : 1.0,
+      duration: const Duration(milliseconds: 200),
+      child: child,
+    );
+  },
+  child: const MessageBubble(),
+)
+```
+
+### Programmatic Control
+
+Check menu state and dismiss programmatically:
+
+```dart
+final menuState = QuickActionMenu.of(context);
+
+// Check if menu is displayed
+if (menuState.isMenuDisplayed) {
+  // Dismiss with animation
+  await menuState.hideMenu();
+}
+```
+
+---
+
+## Example
+
+A complete example is available in the [example](example/) directory.
 
 ```dart
 import 'package:flutter/material.dart';
 import 'package:quick_action_menu/quick_action_menu.dart';
-import 'package:quick_action_menu/src/enums/menu_overlay_horizontal_alignment.dart'; // Import if not already
-import 'package:quick_action_menu/src/enums/sticky_menu_behavior.dart'; // Import if not already
 
-class MyHomePage extends StatelessWidget {
+class ChatScreen extends StatelessWidget {
+  const ChatScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Quick Action Menu Demo')),
-      body: Center(
-        child: GestureDetector(
-          onLongPress: () {
-            final quickActionMenu = QuickActionMenu.of(context);
-            const String anchorTag = 'myUniqueMessageAnchor';
-
-            // Define the anchorWidget that will "fly" and be shown in the overlay.
-            // This is typically a duplicate of the QuickActionAnchor's child.
-            final Widget flyingAnchorWidget = Container(
-              padding: const EdgeInsets.all(16),
-              color: Colors.blue,
-              child: const Text(
-                'Long press this text',
-                style: TextStyle(color: Colors.white),
+      appBar: AppBar(title: const Text('Chat')),
+      body: QuickActionMenu(
+        child: ListView.builder(
+          itemCount: 20,
+          itemBuilder: (context, index) {
+            final tag = 'message_$index';
+            return GestureDetector(
+              onLongPress: () => _showMenu(context, tag),
+              child: QuickActionAnchor(
+                tag: tag,
+                child: MessageBubble(index: index),
               ),
-            );
-
-            // Show the menu using the tag and desired configuration parameters
-            quickActionMenu.showMenu(
-              tag: anchorTag,
-              anchorWidget: flyingAnchorWidget, // The widget that will fly and appear in the overlay
-              topMenuWidget: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextButton(onPressed: () {}, child: const Text('Reply')),
-                      TextButton(onPressed: () {}, child: const Text('Copy')),
-                    ],
-                  ),
-                ),
-              ),
-              bottomMenuWidget: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(icon: const Icon(Icons.star), onPressed: () {}),
-                      IconButton(icon: const Icon(Icons.delete), onPressed: () {}),
-                    ],
-                  ),
-                ),
-              ),
-              // Customizations:
-              padding: const EdgeInsets.all(16.0), // Safe area padding
-              overlayBackgroundOpacity: 0.4,
-              backdropBlurSigmaX: 5.0,
-              backdropBlurSigmaY: 5.0,
-              topMenuAlignment: OverlayMenuHorizontalAlignment.center,
-              bottomMenuAlignment: OverlayMenuHorizontalAlignment.center,
-              stickyMenuBehavior: StickyMenuBehavior.top, // Example: Top menu sticks on scroll
             );
           },
-          child: QuickActionAnchor(
-            tag: 'myUniqueMessageAnchor',
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              color: Colors.blue,
-              child: const Text(
-                'Long press this text',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
         ),
       ),
+    );
+  }
+
+  void _showMenu(BuildContext context, String tag) {
+    QuickActionMenu.of(context).showMenu(
+      tag: tag,
+      topMenuWidget: const ReactionPicker(),
+      bottomMenuWidget: const ActionBar(),
+      padding: MediaQuery.of(context).padding,
+      stickyMenuBehavior: StickyMenuBehavior.top,
     );
   }
 }
 ```
 
-### `showMenu` Parameters
+---
 
-| Parameter                    | Type                             | Description                                                                                                                                                          | Default Value         |
-| :--------------------------- | :------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------- |
-| `tag`                        | `Object`                         | **Required.** The unique tag of the `QuickActionAnchor` to which this menu should be attached.                                                                       |                       |
-| `anchorWidget`               | `Widget`                         | **Required.** The widget that will be displayed as the animated anchor within the overlay. This should typically be a duplicate of your `QuickActionAnchor`'s child. |                       |
-| `topMenuWidget`              | `Widget?`                        | Optional widget to display above the anchor.                                                                                                                         | `null`                |
-| `bottomMenuWidget`           | `Widget?`                        | Optional widget to display below the anchor.                                                                                                                         | `null`                |
-| `topMenuAlignment`           | `OverlayMenuHorizontalAlignment` | Horizontal alignment for the `topMenuWidget` relative to the anchor.                                                                                                 | `center`              |
-| `bottomMenuAlignment`        | `OverlayMenuHorizontalAlignment` | Horizontal alignment for the `bottomMenuWidget` relative to the anchor.                                                                                              | `center`              |
-| `overlayAnimationDuration`   | `Duration`                       | Duration for the overall overlay visibility (fade, blur) animations.                                                                                                 | `Durations.medium1`   |
-| `overlayAnimationCurve`      | `Curve`                          | Curve for the overall overlay visibility animations.                                                                                                                 | `Curves.easeOutCubic` |
-| `anchorFlyAnimationDuration` | `Duration`                       | Duration for the anchor's "fly" animation from its original position to its overlay position.                                                                        | `Durations.medium2`   |
-| `anchorFlyAnimationCurve`    | `Curve`                          | Curve for the anchor's "fly" animation.                                                                                                                              | `Curves.easeOutSine`  |
-| `topMenuScaleDuration`       | `Duration`                       | Duration for the `topMenuWidget` scale animation.                                                                                                                    | `Durations.medium2`   |
-| `topMenuScaleCurve`          | `Curve`                          | Curve for the `topMenuWidget` scale animation.                                                                                                                       | `Curves.easeOutBack`  |
-| `bottomMenuScaleDuration`    | `Duration`                       | Duration for the `bottomMenuWidget` scale animation.                                                                                                                 | `Durations.medium2`   |
-| `bottomMenuScaleCurve`       | `Curve`                          | Curve for the `bottomMenuWidget` scale animation.                                                                                                                    | `Curves.easeOutBack`  |
-| `overlayBackgroundColor`     | `Color`                          | The background color of the overlay.                                                                                                                                 | `Colors.black`        |
-| `overlayBackgroundOpacity`   | `double`                         | The opacity of the overlay background color (0.0 to 1.0).                                                                                                            | `0.2`                 |
-| `backdropBlurSigmaX`         | `double`                         | The sigmaX value for the backdrop blur effect.                                                                                                                       | `10.0`                |
-| `backdropBlurSigmaY`         | `double`                         | The sigmaY value for the backdrop blur effect.                                                                                                                       | `10.0`                |
-| `reverseScroll`              | `bool`                           | Determines if the internal `SingleChildScrollView` should scroll in reverse. Useful for chat-like interfaces.                                                        | `false`               |
-| `padding`                    | `EdgeInsets`                     | General padding for the screen edges, defining a "safe area" where the menu should ideally stay.                                                                     | `EdgeInsets.zero`     |
-| `stickyMenuBehavior`         | `StickyMenuBehavior`             | Defines how the top/bottom menus behave during scrolling (`none`, `top`, `bottom`, `both`).                                                                          | `none`                |
+## Contributing
 
-### Enums
+Contributions are welcome! Please feel free to:
 
-#### `OverlayMenuHorizontalAlignment`
+1. 🐛 Report bugs by [opening an issue](https://github.com/user/quick_action_menu/issues)
+2. 💡 Suggest features or improvements
+3. 🔧 Submit pull requests
 
-Defines horizontal alignment options for menu widgets relative to the anchor.
+---
 
-  - `left`
-  - `center`
-  - `right`
+## License
 
-#### `StickyMenuBehavior`
-
-Defines how menu widgets behave when the content inside the overlay scrolls.
-
-  - `none`: Neither menu sticks.
-  - `top`: The top menu sticks to the anchor's calculated position or the top of the scroll view.
-  - `bottom`: The bottom menu sticks to the anchor's calculated position or the bottom of the scroll view.
-  - `both`: Both menus stick to their respective ends or the anchor.
-
-## Contribution
-
-Contributions are welcome\! Please feel free to open an issue or submit a pull request.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
