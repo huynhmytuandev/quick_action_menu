@@ -6,9 +6,10 @@
 
 A Flutter package for displaying highly customizable context menus inspired by Telegram and WeChat-style quick action menus. Perfect for chat applications, message bubbles, or any widget that needs contextual actions with smooth "flying" anchor animations and sticky menu behaviors.
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/user/quick_action_menu/main/demo.gif" alt="Quick Action Menu Demo" width="300"/>
-</p>
+Demo for basic and scrollable content usage:
+
+|![basic_demo](./docs/demo/basic_usage_demo.gif)|![scroll_demo](./docs/demo/scrollable_content_usage_demo-ezgif.com-optimize.gif)|
+|:--:|:--:|
 
 ---
 
@@ -50,11 +51,12 @@ A Flutter package for displaying highly customizable context menus inspired by T
 
 ## Installation
 
+### Manual Installation
 Add `quick_action_menu` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  quick_action_menu: ^0.1.0
+  quick_action_menu: ^1.0.0
 ```
 
 Then run:
@@ -62,6 +64,15 @@ Then run:
 ```bash
 flutter pub get
 ```
+
+### CLI Installation
+
+Alternatively, run the following command in your terminal:
+
+```bash
+flutter pub add quick_action_menu
+```
+
 
 ---
 
