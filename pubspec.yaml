@@ -3,8 +3,8 @@ description:
   A Flutter package for displaying Telegram/WeChat-style context menus with
   smooth flying anchor animations, sticky menu behaviors, and backdrop blur effects.
 version: 1.0.0
-repository: https://github.com/user/quick_action_menu
-issue_tracker: https://github.com/user/quick_action_menu/issues
+repository: https://github.com/huynhmytuandev/quick_action_menu
+issue_tracker: https://github.com/huynhmytuandev/quick_action_menu/issues
 topics:
   - ui
   - menu
