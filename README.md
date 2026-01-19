@@ -8,7 +8,7 @@ A Flutter package for displaying highly customizable context menus inspired by T
 
 Demo for basic and scrollable content usage:
 
-|![basic_demo](./docs/demo/basic_usage_demo.gif)|![scroll_demo](./docs/demo/scrollable_content_usage_demo-ezgif.com-optimize.gif)|
+|![basic_demo](./docs/demo/basic_usage_demo.gif)|![scroll_demo](./docs/demo/scrollable_content_usage_demo.gif)|
 |:--:|:--:|
 
 ---
