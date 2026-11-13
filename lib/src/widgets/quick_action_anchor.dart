@@ -178,43 +178,36 @@ class _QuickActionAnchorState extends State<QuickActionAnchor> {
   Widget build(BuildContext context) {
     final showPlaceholder = _placeholderSize != null;
 
-    if (showPlaceholder && widget.placeholderBuilder != null) {
-      return widget.placeholderBuilder!(context, _placeholderSize!);
+    if (showPlaceholder) {
+      if (widget.placeholderBuilder != null) {
+        return widget.placeholderBuilder!(context, _placeholderSize!);
+      }
+      return SizedBox.fromSize(size: _placeholderSize);
     }
 
-    return SizedBox(
-      width: _placeholderSize?.width,
-      height: _placeholderSize?.height,
-      child: Offstage(
-        offstage: showPlaceholder,
-        child: TickerMode(
-          enabled: !showPlaceholder,
-          child: KeyedSubtree(
-            key: _key,
-            child: Builder(
-              builder: (context) {
-                if (widget.childBuilder case final childBuilder? when mounted) {
-                  return ValueListenableBuilder<bool>(
-                    valueListenable: _extractionNotifier,
-                    builder: (context, isExtracted, _) {
-                      return childBuilder(
-                        context,
-                        isExtracted,
-                        widget.child,
-                      );
-                    },
-                  );
-                } else if (widget.child case final child?) {
-                  return child;
-                }
-                return ErrorWidget(
-                  'QuickActionAnchor: one of child or childBuilder '
-                  ' must be provided',
+    return KeyedSubtree(
+      key: _key,
+      child: Builder(
+        builder: (context) {
+          if (widget.childBuilder case final childBuilder? when mounted) {
+            return ValueListenableBuilder<bool>(
+              valueListenable: _extractionNotifier,
+              builder: (context, isExtracted, _) {
+                return childBuilder(
+                  context,
+                  isExtracted,
+                  widget.child,
                 );
               },
-            ),
-          ),
-        ),
+            );
+          } else if (widget.child case final child?) {
+            return child;
+          }
+          return ErrorWidget(
+            'QuickActionAnchor: one of child or childBuilder '
+            ' must be provided',
+          );
+        },
       ),
     );
   }

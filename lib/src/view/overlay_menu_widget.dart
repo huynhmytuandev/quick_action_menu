@@ -141,9 +141,8 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
 
   /// Calculates the initial global position and size of the anchor widget.
   void _calculateInitialLayout() {
-    final renderBox =
-        widget.config.anchorKey.currentContext?.findRenderObject()
-            as RenderBox?;
+    final renderBox = widget.config.anchorKey.currentContext?.findRenderObject()
+        as RenderBox?;
     if (renderBox == null || !renderBox.attached) return;
 
     final anchorRect = renderBox.localToGlobal(Offset.zero) & renderBox.size;
@@ -152,13 +151,10 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
       _originalAnchorRect = anchorRect;
     });
 
-    // Notify when anchor has been measured and its position captured.
-    //
-    // Using post-frame callback to ensure the ovelay is fully visible
-    // before calling the callback.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.config.onAnchorExtracted?.call();
-    });
+    // Set up anchor rect without hiding the original anchor yet.
+    // We notify onAnchorExtracted when the fly-in animation starts so there
+    // is no blank frame between hiding the original anchor and showing
+    // the overlay.
   }
 
   /// Callback when the top menu widget's size is measured.
@@ -195,17 +191,16 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
 
     final screenSize = MediaQuery.of(context).size;
 
-    final result =
-        MenuPositionCalculator(
-          screenSize: screenSize,
-          padding: widget.config.padding,
-          topWidgetAlign: widget.config.topMenuAlignment,
-          bottomWidgetAlign: widget.config.bottomMenuAlignment,
-        ).calculate(
-          anchorRect: _originalAnchorRect!,
-          topWidgetSize: _measuredTopMenuSize ?? Size.zero,
-          bottomWidgetSize: _measuredBottomMenuSize ?? Size.zero,
-        );
+    final result = MenuPositionCalculator(
+      screenSize: screenSize,
+      padding: widget.config.padding,
+      topWidgetAlign: widget.config.topMenuAlignment,
+      bottomWidgetAlign: widget.config.bottomMenuAlignment,
+    ).calculate(
+      anchorRect: _originalAnchorRect!,
+      topWidgetSize: _measuredTopMenuSize ?? Size.zero,
+      bottomWidgetSize: _measuredBottomMenuSize ?? Size.zero,
+    );
 
     if (result == _positionResult) {
       return;
@@ -214,27 +209,25 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
     _safeSetState(() {
       // Initial state for the anchor fly animation
       _positionResult = result;
-      _anchorFlyOffsetAnimation =
-          Tween<Offset>(
-            begin: _originalAnchorRect!.topLeft,
-            end: _originalAnchorRect!.topLeft,
-          ).animate(
-            CurvedAnimation(
-              parent: _anchorFlyAnimationController,
-              curve: widget.config.anchorFlyAnimationCurve,
-            ),
-          );
+      _anchorFlyOffsetAnimation = Tween<Offset>(
+        begin: _originalAnchorRect!.topLeft,
+        end: _originalAnchorRect!.topLeft,
+      ).animate(
+        CurvedAnimation(
+          parent: _anchorFlyAnimationController,
+          curve: widget.config.anchorFlyAnimationCurve,
+        ),
+      );
 
-      _anchorScaleAnimation =
-          Tween<double>(
-            begin: 1,
-            end: result.scaledAnchorSize.width / _originalAnchorRect!.width,
-          ).animate(
-            CurvedAnimation(
-              parent: _anchorFlyAnimationController,
-              curve: widget.config.anchorScaleAnimationCurve,
-            ),
-          );
+      _anchorScaleAnimation = Tween<double>(
+        begin: 1,
+        end: result.scaledAnchorSize.width / _originalAnchorRect!.width,
+      ).animate(
+        CurvedAnimation(
+          parent: _anchorFlyAnimationController,
+          curve: widget.config.anchorScaleAnimationCurve,
+        ),
+      );
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -248,18 +241,18 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
 
       _safeSetState(() {
         // Set up the initial "fly-in" animation for the anchor.
-        _anchorFlyOffsetAnimation =
-            Tween<Offset>(
-              begin: _originalAnchorRect!.topLeft,
-              end: endFlyOffset,
-            ).animate(
-              CurvedAnimation(
-                parent: _anchorFlyAnimationController,
-                curve: widget.config.anchorFlyAnimationCurve,
-              ),
-            );
+        _anchorFlyOffsetAnimation = Tween<Offset>(
+          begin: _originalAnchorRect!.topLeft,
+          end: endFlyOffset,
+        ).animate(
+          CurvedAnimation(
+            parent: _anchorFlyAnimationController,
+            curve: widget.config.anchorFlyAnimationCurve,
+          ),
+        );
       });
 
+      widget.config.onAnchorExtracted?.call();
       _overlayVisibilityController.forward();
       _topMenuScaleController.forward();
       _bottomMenuScaleController.forward();
@@ -271,17 +264,15 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
   Future<void> _reverseAnimateAndDissmiss() async {
     final endFlyOffset = _calculateAnchorCurrentPosition();
     if (mounted) {
-      
-      _anchorFlyOffsetAnimation =
-          Tween<Offset>(
-            begin: _originalAnchorRect?.topLeft ?? Offset.zero,
-            end: endFlyOffset,
-          ).animate(
-            CurvedAnimation(
-              parent: _anchorFlyAnimationController,
-              curve: widget.config.anchorFlyAnimationCurve,
-            ),
-          );
+      _anchorFlyOffsetAnimation = Tween<Offset>(
+        begin: _originalAnchorRect?.topLeft ?? Offset.zero,
+        end: endFlyOffset,
+      ).animate(
+        CurvedAnimation(
+          parent: _anchorFlyAnimationController,
+          curve: widget.config.anchorFlyAnimationCurve,
+        ),
+      );
       _safeSetState(() {});
     }
     await Future.wait([
@@ -298,9 +289,8 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
   }
 
   Offset _calculateAnchorCurrentPosition() {
-    final contentAnchorRenderBox =
-        _contentAnchorGlobalKey.currentContext?.findRenderObject()
-            as RenderBox?;
+    final contentAnchorRenderBox = _contentAnchorGlobalKey.currentContext
+        ?.findRenderObject() as RenderBox?;
 
     Offset contentAnchorPosition;
     if (contentAnchorRenderBox != null) {
@@ -331,18 +321,20 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
     final measuredTopMenuSize = _measuredTopMenuSize ?? Size.zero;
     final measuredBottomMenuSize = _measuredBottomMenuSize ?? Size.zero;
 
-    final scrollPhysics = requiresScrolling
-        ? null
-        : const NeverScrollableScrollPhysics();
+    final scrollPhysics =
+        requiresScrolling ? null : const NeverScrollableScrollPhysics();
+
+    final needsTopMeasurement =
+        widget.config.topMenuWidget != null && _measuredTopMenuSize == null;
+    final needsBottomMeasurement = widget.config.bottomMenuWidget != null &&
+        _measuredBottomMenuSize == null;
 
     return Material(
       type: MaterialType.transparency,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if ((widget.config.topMenuWidget != null ||
-                  widget.config.bottomMenuWidget != null) &&
-                  _measuredBottomMenuSize == null)
+          if (needsTopMeasurement || needsBottomMeasurement)
             Positioned(
               top: -1000, // Offscreen position
               left: -1000,
@@ -352,7 +344,7 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
                 onTopMenuMeasured: _onTopMenuMeasured,
                 onBottomMenuMeasured: _onBottomMenuMeasured,
               ),
-          ),
+            ),
           if (_positionResult != null) ...[
             // 1. Background dismissal area with blur and color overlay.
             MenuBackgroundOverlay(
@@ -420,10 +412,12 @@ class OverlayMenuWidgetState extends State<OverlayMenuWidget>
                                 key: _contentAnchorGlobalKey,
                                 valueListenable: _isAnchorOffstageNotifier,
                                 builder: (context, isOffstage, child) {
-                                  return Offstage(
-                                    offstage: isOffstage,
-                                    child: child,
-                                  );
+                                  if (isOffstage) {
+                                    return SizedBox.fromSize(
+                                      size: originalAnchorSize,
+                                    );
+                                  }
+                                  return child!;
                                 },
                                 child: AnimatedBuilder(
                                   animation: _anchorFlyAnimationController,

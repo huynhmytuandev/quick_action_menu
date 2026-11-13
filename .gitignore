@@ -102,6 +102,9 @@ nohup.out
 # Mason
 mason-lock.json
 .mason
+openspec/
+.opencode/
+.agents/
 
 # Exceptions to above rules.
 !.vscode/launch.json
